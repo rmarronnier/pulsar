@@ -20,6 +20,29 @@ abstract class Pulsar::Event < Pulsar::BaseEvent
     self.subscribers << block
   end
 
+  # Subscribe to events with async execution
+  #
+  # The subscriber will be executed in a new fiber, preventing it from
+  # blocking other subscribers or the main execution flow.
+  #
+  # ```
+  # MyEvent.subscribe_async do |event|
+  #   # This runs in a separate fiber
+  #   HTTP::Client.post("https://example.com/webhook", body: event.to_json)
+  # end
+  # ```
+  def self.subscribe_async(&block : self -> Nil)
+    subscribe do |event|
+      spawn do
+        begin
+          block.call(event)
+        rescue exception
+          Pulsar::ErrorHandler.handle(exception, event)
+        end
+      end
+    end
+  end
+
   # Publishes the event to all subscribers.
   #
   # ```
@@ -55,7 +78,11 @@ abstract class Pulsar::Event < Pulsar::BaseEvent
     Pulsar.maybe_log_event(self)
 
     self.class.subscribers.each do |s|
-      s.call(self)
+      begin
+        s.call(self)
+      rescue exception
+        Pulsar::ErrorHandler.handle(exception, self)
+      end
     end
   end
 end
