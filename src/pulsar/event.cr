@@ -77,9 +77,9 @@ abstract class Pulsar::Event < Pulsar::BaseEvent
   protected def publish
     Pulsar.maybe_log_event(self)
 
-    self.class.subscribers.each do |s|
+    self.class.subscribers.each do |subscriber|
       begin
-        s.call(self)
+        subscriber.call(self)
       rescue exception
         Pulsar::ErrorHandler.handle(exception, self)
       end

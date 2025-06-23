@@ -96,9 +96,9 @@ abstract class Pulsar::TimedEvent < Pulsar::BaseEvent
     result = yield
     duration = Time.monotonic - start
 
-    self.class.subscribers.each do |s|
+    self.class.subscribers.each do |subscriber|
       begin
-        s.call(self, duration)
+        subscriber.call(self, duration)
       rescue exception
         Pulsar::ErrorHandler.handle(exception, self)
       end

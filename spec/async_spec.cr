@@ -16,12 +16,12 @@ describe "Pulsar async subscribers" do
     it "runs subscribers asynchronously" do
       channel = Channel(Int32).new
 
-      Pulsar::AsyncTestEvent.subscribe_async do |event|
+      Pulsar::AsyncTestEvent.subscribe_async do |_event|
         sleep 10.milliseconds
         channel.send(1)
       end
 
-      Pulsar::AsyncTestEvent.subscribe_async do |event|
+      Pulsar::AsyncTestEvent.subscribe_async do |_event|
         sleep 10.milliseconds
         channel.send(2)
       end
@@ -42,11 +42,11 @@ describe "Pulsar async subscribers" do
       sync_called = false
       async_channel = Channel(Nil).new
 
-      Pulsar::AsyncTestEvent.subscribe do |event|
+      Pulsar::AsyncTestEvent.subscribe do |_event|
         sync_called = true
       end
 
-      Pulsar::AsyncTestEvent.subscribe_async do |event|
+      Pulsar::AsyncTestEvent.subscribe_async do |_event|
         sleep 10.milliseconds
         async_channel.send(nil)
       end
@@ -65,7 +65,7 @@ describe "Pulsar async subscribers" do
     it "runs timed subscribers asynchronously" do
       channel = Channel(Float64).new
 
-      Pulsar::AsyncTestTimedEvent.subscribe_async do |event, duration|
+      Pulsar::AsyncTestTimedEvent.subscribe_async do |_event, duration|
         sleep 10.milliseconds
         channel.send(duration.total_milliseconds)
       end
@@ -96,7 +96,7 @@ describe "Pulsar async subscribers" do
         nil
       }
 
-      Pulsar::AsyncTestEvent.subscribe_async do |event|
+      Pulsar::AsyncTestEvent.subscribe_async do |_event|
         raise "Async error"
       end
 
